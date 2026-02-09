@@ -1,20 +1,6 @@
 # HRMS Lite - Human Resource Management System
 
 A full-stack web application for managing employees and tracking attendance, built with FastAPI (Python) and React.
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [System Architecture](#system-architecture)
-3. [Database Design](#database-design)
-4. [Tech Stack](#tech-stack)
-5. [Project Structure](#project-structure)
-6. [API Documentation](#api-documentation)
-7. [Setup Instructions](#setup-instructions)
-8. [Features](#features)
-9. [Assumptions](#assumptions)
-10. [Deployment Guide](#deployment-guide)
-
 ---
 
 ## Overview
