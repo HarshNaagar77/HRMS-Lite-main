@@ -27,104 +27,6 @@ HRMS Lite is a lightweight employee management system that allows administrators
 
 ---
 
-## System Architecture
-
-### High-Level Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         CLIENT LAYER                             │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │                    React Frontend                        │    │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────────────────┐   │    │
-│  │  │Dashboard │  │Employees │  │     Attendance       │   │    │
-│  │  │  Page    │  │  Page    │  │       Page           │   │    │
-│  │  └──────────┘  └──────────┘  └──────────────────────┘   │    │
-│  │                       │                                  │    │
-│  │              ┌────────┴────────┐                        │    │
-│  │              │   API Service   │ (axios)                │    │
-│  │              │    (api.js)     │                        │    │
-│  │              └────────┬────────┘                        │    │
-│  └───────────────────────│─────────────────────────────────┘    │
-└──────────────────────────│──────────────────────────────────────┘
-                           │ HTTP/REST
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        SERVER LAYER                              │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │                   FastAPI Backend                        │    │
-│  │                                                          │    │
-│  │  ┌──────────────────────────────────────────────────┐   │    │
-│  │  │                  main.py                          │   │    │
-│  │  │            (CORS, Router Setup)                   │   │    │
-│  │  └──────────────────────┬───────────────────────────┘   │    │
-│  │                         │                                │    │
-│  │  ┌──────────────────────┴───────────────────────────┐   │    │
-│  │  │               Controllers (Routes)                │   │    │
-│  │  │  ┌─────────────┐ ┌─────────────┐ ┌────────────┐  │   │    │
-│  │  │  │  Employee   │ │ Attendance  │ │ Dashboard  │  │   │    │
-│  │  │  │ Controller  │ │ Controller  │ │ Controller │  │   │    │
-│  │  │  └─────────────┘ └─────────────┘ └────────────┘  │   │    │
-│  │  └──────────────────────┬───────────────────────────┘   │    │
-│  │                         │                                │    │
-│  │  ┌──────────────────────┴───────────────────────────┐   │    │
-│  │  │                Models (Pydantic)                  │   │    │
-│  │  │  ┌─────────────────┐  ┌─────────────────────┐    │   │    │
-│  │  │  │ EmployeeModel   │  │  AttendanceModel    │    │   │    │
-│  │  │  └─────────────────┘  └─────────────────────┘    │   │    │
-│  │  └──────────────────────────────────────────────────┘   │    │
-│  │                         │                                │    │
-│  │  ┌──────────────────────┴───────────────────────────┐   │    │
-│  │  │              Config (database.py)                 │   │    │
-│  │  │            MongoDB Connection Handler             │   │    │
-│  │  └──────────────────────┬───────────────────────────┘   │    │
-│  └─────────────────────────│───────────────────────────────┘    │
-└────────────────────────────│────────────────────────────────────┘
-                             │ PyMongo Driver
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                       DATABASE LAYER                             │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │                   MongoDB Atlas                          │    │
-│  │                                                          │    │
-│  │    ┌──────────────────┐    ┌──────────────────┐         │    │
-│  │    │   employees      │    │   attendance     │         │    │
-│  │    │   Collection     │    │   Collection     │         │    │
-│  │    └──────────────────┘    └──────────────────┘         │    │
-│  │                                                          │    │
-│  └─────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Request Flow
-
-```
-User Action → React Component → API Call (axios) → FastAPI Endpoint
-    ↓
-FastAPI Controller → Pydantic Validation → MongoDB Operation
-    ↓
-MongoDB Response → Controller Response → React State Update → UI Render
-```
-
----
-
-## Database Design
-
-### Entity Relationship Diagram
-
-```
-┌─────────────────────────────┐       ┌─────────────────────────────┐
-│         EMPLOYEES           │       │        ATTENDANCE           │
-├─────────────────────────────┤       ├─────────────────────────────┤
-│ _id        : ObjectId (PK)  │       │ _id         : ObjectId (PK) │
-│ employee_id: String (Unique)│◄──────│ employee_id : String (FK)   │
-│ full_name  : String         │   1:N │ date        : String        │
-│ email      : String (Unique)│       │ status      : String        │
-│ department : String         │       │              (Present/Absent)│
-│ created_at : DateTime       │       │ created_at  : DateTime      │
-└─────────────────────────────┘       └─────────────────────────────┘
-```
-
 ### Collections Schema
 
 #### employees Collection
@@ -150,13 +52,6 @@ MongoDB Response → Controller Response → React State Update → UI Render
 }
 ```
 
-### Indexes
-- `employees.employee_id` - Unique index
-- `employees.email` - Unique index
-- `attendance.employee_id + attendance.date` - Compound unique index
-
----
-
 ## Tech Stack
 
 | Layer | Technology | Purpose |
@@ -176,55 +71,6 @@ MongoDB Response → Controller Response → React State Update → UI Render
 | Deployment | Vercel | Frontend Hosting |
 | Deployment | Render | Backend Hosting |
 | Deployment | MongoDB Atlas | Cloud Database |
-
----
-
-## Project Structure
-
-```
-EtheraAI/
-│
-├── backend/                      # FastAPI Backend
-│   ├── config/
-│   │   ├── __init__.py
-│   │   └── database.py          # MongoDB connection setup
-│   │
-│   ├── controllers/
-│   │   ├── __init__.py
-│   │   ├── employee_controller.py   # Employee CRUD routes
-│   │   ├── attendance_controller.py # Attendance routes
-│   │   └── dashboard_controller.py  # Dashboard stats route
-│   │
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── employee_model.py    # Employee Pydantic schemas
-│   │   └── attendance_model.py  # Attendance Pydantic schemas
-│   │
-│   ├── main.py                  # FastAPI app entry point
-│   ├── requirements.txt         # Python dependencies
-│   └── .env                     # Environment variables
-│
-├── frontend/                    # React Frontend
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── Dashboard.jsx    # Dashboard component
-│   │   │   ├── Employees.jsx    # Employee management
-│   │   │   └── Attendance.jsx   # Attendance tracking
-│   │   │
-│   │   ├── App.jsx              # Main app with routing
-│   │   ├── api.js               # Axios API functions
-│   │   ├── main.jsx             # React entry point
-│   │   └── index.css            # Global styles + Tailwind
-│   │
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── tailwind.config.cjs
-│   ├── postcss.config.cjs
-│   └── .env
-│
-└── README.md
-```
 
 ---
 
@@ -259,42 +105,6 @@ http://localhost:8000/api
 | Method | Endpoint | Description | Response |
 |--------|----------|-------------|----------|
 | GET | `/dashboard` | Get statistics | `{total_employees, present_today, absent_today}` |
-
-### Sample Requests
-
-#### Create Employee
-```bash
-POST /api/employees
-Content-Type: application/json
-
-{
-  "employee_id": "EMP001",
-  "full_name": "John Doe",
-  "email": "john@example.com",
-  "department": "Engineering"
-}
-```
-
-#### Mark Attendance
-```bash
-POST /api/attendance
-Content-Type: application/json
-
-{
-  "employee_id": "EMP001",
-  "date": "2024-01-15",
-  "status": "Present"
-}
-```
-
----
-
-## Setup Instructions
-
-### Prerequisites
-- Python 3.8+
-- Node.js 16+
-- MongoDB (local) or MongoDB Atlas account
 
 ### Backend Setup
 
@@ -364,21 +174,3 @@ App runs at: `http://localhost:5173`
 - Present days counter per employee
 
 ---
-
-## Assumptions
-
-1. **Single Admin**: No authentication - single admin user assumed
-2. **Unique Constraints**: Employee ID and email must be unique
-3. **Date Format**: Attendance uses YYYY-MM-DD format
-4. **Upsert Logic**: Marking attendance again for same date updates existing record
-5. **Cascade Delete**: Deleting employee removes their attendance records
-6. **No Pagination**: Suitable for small-medium employee counts
-7. **Status Values**: Only "Present" or "Absent" allowed
-
-
----
-
-## Author
-
-Built for HRMS Lite Full-Stack Assignment
-
